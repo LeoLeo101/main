@@ -1,0 +1,71 @@
+
+
+rm(list=ls())
+
+library(dplyr)
+library(scales)
+
+df <- read.csv("C:/Users/leoan/OneDrive/Desktop/Download Data - STOCK_BE_XBRU_UCB.csv")
+
+df<- as.data.frame(df)
+massimo<-max(df$Close)
+minimo <-min(df$Close)
+
+
+LdateCor<-c()
+
+
+for (data in df$Date) {
+  
+  mese<-substr(data,1,2)
+  giorno<-substr(data,4,5)
+  anno<-substr(data,7,11)
+  
+  data_corretta<- paste0(giorno,"/",mese,"/",anno)
+  
+  LdateCor<-c(LdateCor,data_corretta)
+  
+}
+
+
+df<-cbind(df,data=as.Date(LdateCor, format = "%d/%m/%Y"))
+
+df <- df %>% select(data,Close)
+
+
+
+numaz<-587
+
+df<- df %>% mutate(valore = (Close*numaz)*(1-0.43))
+
+
+
+
+Minimum<- df[df$Close == min(df$Close),]
+Massimum<- df[df$Close == max(df$Close),]
+
+days<-abs(Minimum$data - Massimum$data)
+variazione<- Minimum$valore - Massimum$valore
+
+varPerc<- variazione / Massimum$valore
+
+
+frase<- paste(
+  "le azioni sono passate da un prezzo di",
+  Massimum$Close,
+  " corrispondente ad un valore di ",
+  dollar(Massimum$valore, prefix = "€", big.mark = ".", decimal.mark = ","),
+  "\na un prezzo di",
+  Minimum$Close,
+  "corrispondente ad un valore di",
+  dollar(Minimum$valore, prefix = "€", big.mark = ".", decimal.mark = ","),
+  "\novvero una variazione di",
+  dollar(variazione, prefix = "€", big.mark = ".", decimal.mark = ","),
+  "|",
+  percent(varPerc),
+  "in",
+  days,
+  "giorni"
+  )
+
+cat(frase)
