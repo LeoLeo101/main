@@ -1,0 +1,171 @@
+rm(list = ls())
+library(dplyr)
+library(ggplot2)
+
+
+
+ggplot(mtcars,aes(x=factor(cyl),fill = factor(cyl)))+
+  geom_bar()+
+  labs(title = "numero di macchine per cilindri",
+       x="numero cilindri",
+       y= "numero macchine")+
+  theme_minimal()
+
+ggplot(mtcars,aes(x=mpg))+
+  geom_histogram(binwidth = 2, fill = "orange", color="white")+
+  labs(title = "Distribuzione miglia per gallone",
+       x="Miglia per gallone",
+       y="Numero di veicoli")+
+  theme_minimal()
+
+ggplot(mtcars,aes(x=mpg,y=hp,color=factor(cyl)))+
+  geom_point(size=4)+
+  theme_minimal()
+
+
+mesi <- month.abb
+temperatura <- c(3, 5, 9, 14, 18, 22, 25, 24, 20, 15, 9, 4)
+df <- data.frame(mese = factor(mesi, levels = mesi), temperatura = temperatura)
+
+ggplot(df,aes(x=mese,y=temperatura, group = 1))+
+  geom_line(color = "tomato",size=1.3)+
+  geom_point(color = "black",size=1.3)+
+  theme_minimal()
+
+
+ggplot(iris,aes(x=Species,y=Petal.Length,fill = factor(Species)))+
+  geom_boxplot()+
+  theme_minimal()
+
+
+
+mtcars1<- mtcars %>%
+  mutate(car = rownames(mtcars))
+
+ggplot(mtcars1,aes(x=mpg,y=hp,color=factor(cyl)))+
+  geom_point(size=4)+
+  geom_text(aes(label = car), hjust = -0.1, vjust = 2, size = 3) +
+  theme_minimal()
+
+
+df<-na.omit(as.data.frame(read.csv("C:\\Users\\Andrea\\OneDrive\\Desktop\\vehicles_dataset.csv",header = TRUE)))
+
+
+df_filtered <- df %>%
+  count(year) %>%
+  filter(n > 0)
+
+# Grafico
+ggplot(df_filtered, aes(x = reorder(year, n), y = n)) +
+  geom_bar(stat = "identity", fill = "orange", color = "white") +
+  coord_flip() +
+  theme_minimal() +
+  geom_text(aes(label = n), hjust = -0.5,size=3)+
+  xlab("Model") +
+  ylab("Frequenza") +
+  ggtitle("Modelli con più di 40 occorrenze")
+
+
+ggplot(df, aes(x = factor(cylinders), y = price, fill = factor(cylinders))) +
+  geom_boxplot() +
+  labs(x = "Numero di cilindri", y = "Prezzo") +
+  theme_minimal() +
+  theme(legend.position = "none")
+
+ggplot(df[df$mileage<100,],aes(x=mileage,y=price,color=price))+
+  geom_point(size = 2, alpha = 0.9) +
+  geom_smooth(method="lm",color = "black")+
+  scale_color_gradient(low = "blue", high = "red")+
+  labs(title = "Prezzo vs Chilometraggio (mileage < 1000)",
+       x = "Chilometraggio (miglia)",
+       y = "Prezzo",
+       color = "Prezzo") +
+  theme_minimal()
+
+
+ggplot(df, aes(x = factor(body), y = price, fill = factor(body))) +
+  geom_boxplot() +
+  labs(x = "Carburante", y = "Prezzo") +
+  theme_minimal() +
+  theme(legend.position = "none")
+
+
+
+table(dati_strutture_ricettive$TIPOLOGIA)
+
+df<-dati_strutture_ricettive
+
+df<- df%>%count(TIPOLOGIA)
+
+ggplot(dati_strutture_ricettive,aes(x=TIPOLOGIA,y=TOTALE_UNITA))+
+  geom_boxplot()+
+  coord_flip()
+
+
+
+df2<-dati_strutture_ricettive%>%
+  group_by(TIPOLOGIA)%>%
+  summarise(mediaCamere =mean(TOTALE_UNITA))
+
+
+ggplot(df2,aes(x=TIPOLOGIA,y=mediaCamere,fill = mediaCamere))+
+  geom_bar(stat = "identity")+
+  geom_text(aes(label=round(mediaCamere)),size = 4,hjust = -1)+
+  scale_fill_gradient(low = "blue", high = "red")+
+  coord_flip()
+
+alberghi<-dati_strutture_ricettive %>%
+  filter(TIPOLOGIA=="Albergo")
+
+alberghistelle<- alberghi%>%
+  count(CATEGORIA) %>%
+  mutate(n=round((n/sum(n))*100,1))
+
+ggplot(alberghistelle,aes(x=CATEGORIA,y=n,fill=n))+
+  geom_bar(stat = "identity")+
+  geom_text(aes(label=n),size = 6,vjust = -0.5)+
+  scale_fill_gradient(low = "blue", high = "red")+
+  theme_minimal()
+
+ggplot(alberghi, aes(x=CATEGORIA,y=TOTALE_UNITA,fill=CATEGORIA))+
+  geom_boxplot(outlier.shape = NA) +
+  geom_jitter(aes(color = TOTALE_UNITA), width = 0.2, alpha = 0.2) +
+  scale_color_gradient(low = "blue", high = "red") +
+  theme_minimal()
+
+
+
+
+df3<-dati_strutture_ricettive %>%
+  filter(TOTALE_UNITA>50&TOTALE_UNITA<150) %>%
+  filter(TIPOLOGIA==c("Albergo","Campeggio"))
+
+
+
+library(viridis)
+
+ggplot(df3, aes(x = TOTALE_UNITA, y = TOTALE_LETTI, color = TIPOLOGIA)) +
+  geom_point(size = 4, alpha = 0.8) +
+  scale_color_viridis_d(option = "D") +  # scala discreta per categorie
+  geom_smooth(method = "lm",se=FALSE)+
+  theme_minimal() +
+  labs(title = "Unità vs Letti per Tipologia",
+       x = "Totale Unità",
+       y = "Totale Letti",
+       color = "Tipologia")
+
+
+dati_strutture_ricettive$COORDX <- as.numeric(gsub(",", ".", dati_strutture_ricettive$COORDX))
+dati_strutture_ricettive$COORDY <- as.numeric(gsub(",", ".", dati_strutture_ricettive$COORDY))
+
+
+df3<-dati_strutture_ricettive %>%
+  #filter(PROV=="TR")%>%
+  filter(COORDX>11)
+
+ggplot(df3, aes(x=COORDX,y=COORDY))+
+  geom_point()+
+  theme_minimal()+
+  scale_x_continuous(breaks = pretty(df3$COORDX, n = 5)) +
+  scale_y_continuous(breaks = pretty(df3$COORDY, n = 5))
+
